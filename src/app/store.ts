@@ -28,6 +28,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }).concat(api.middleware as any),
 });
 
