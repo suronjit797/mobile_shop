@@ -1,33 +1,73 @@
-import { useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Row, Col, Select, Input, Slider, Typography, Empty } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
-import MainLayout from '../../components/layout/MainLayout';
-import ProductCard from '../../components/product/ProductCard';
-import { mockProducts, mockCategories } from '../../utils/mockData';
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Row, Col, Select, Input, Slider, Typography, Empty } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import MainLayout from "../../components/layout/MainLayout";
+import ProductCard from "../../components/product/ProductCard";
+import { mockProducts, mockCategories } from "../../utils/mockData";
 
 const { Title } = Typography;
 
 const ProductListPage = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [search, setSearch] = useState(searchParams.get('search') || '');
-  const [category, setCategory] = useState(searchParams.get('category') || '');
-  const [sortBy, setSortBy] = useState('newest');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
+  const searchParamsValue = searchParams.get("search");
+  const searchParamsCategory = searchParams.get("category");
+
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState<undefined | string>();
+  const [sortBy, setSortBy] = useState("newest");
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
 
   const filteredProducts = useMemo(() => {
     let result = [...mockProducts];
-    if (search) result = result.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
-    if (category) result = result.filter((p) => p.category.toLowerCase() === category.toLowerCase());
-    result = result.filter((p) => p.price >= priceRange[0] && p.price <= priceRange[1]);
+    if (search)
+      result = result.filter((p) =>
+        p.name.toLowerCase().includes(search.toLowerCase()),
+      );
+    if (category)
+      result = result.filter((p) => {
+        return p.category?.toLowerCase()?.includes(category?.toLowerCase());
+      });
+
+    result = result.filter(
+      (p) => p.price >= priceRange[0] && p.price <= priceRange[1],
+    );
+    console.log({ result });
     switch (sortBy) {
-      case 'price_asc': result.sort((a, b) => a.price - b.price); break;
-      case 'price_desc': result.sort((a, b) => b.price - a.price); break;
-      case 'rating': result.sort((a, b) => b.rating - a.rating); break;
-      default: break;
+      case "price_asc":
+        result.sort((a, b) => a.price - b.price);
+        break;
+      case "price_desc":
+        result.sort((a, b) => b.price - a.price);
+        break;
+      case "rating":
+        result.sort((a, b) => b.rating - a.rating);
+        break;
+      default:
+        break;
     }
     return result;
   }, [search, category, sortBy, priceRange]);
+
+  useEffect(() => {
+    setSearch(searchParamsValue || "");
+    setCategory(searchParamsCategory || undefined);
+  }, [searchParamsValue, searchParamsCategory]);
+
+  const searchChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+    if (e.target.value) {
+      navigate(`/products?search=${encodeURIComponent(e.target.value)}`);
+    } else {
+      navigate(`/products`);
+    }
+  };
+
+  const searchClearHandler = () => {
+    setSearch("");
+    navigate("/products");
+  };
 
   return (
     <MainLayout>
@@ -36,33 +76,61 @@ const ProductListPage = () => {
         <Row gutter={[24, 24]}>
           <Col xs={24} md={6}>
             <div className="sticky top-24 flex flex-col gap-4">
-              <Input placeholder="Search..." prefix={<SearchOutlined />} value={search} onChange={(e) => setSearch(e.target.value)} allowClear />
+              <Input
+                placeholder="Search..."
+                prefix={<SearchOutlined />}
+                value={search}
+                onChange={searchChangeHandler}
+                onClear={searchClearHandler}
+                allowClear
+              />
               <div>
                 <p className="font-medium mb-2">Category</p>
-                <Select className="w-full" value={category} onChange={setCategory} allowClear placeholder="All Categories"
-                  options={mockCategories.map((c) => ({ value: c.slug, label: c.name }))}
+                <Select
+                  className="w-full"
+                  value={category}
+                  onChange={setCategory}
+                  allowClear
+                  placeholder="All Categories"
+                  options={mockCategories.map((c) => ({
+                    value: c.slug,
+                    label: c.name,
+                  }))}
                 />
               </div>
               <div>
                 <p className="font-medium mb-2">Price Range</p>
-                <Slider range min={0} max={500} value={priceRange} onChange={(v) => setPriceRange(v as [number, number])} />
-                <p className="text-sm text-muted-foreground">${priceRange[0]} - ${priceRange[1]}</p>
+                <Slider
+                  range
+                  min={0}
+                  max={1000}
+                  value={priceRange}
+                  onChange={(v) => setPriceRange(v as [number, number])}
+                />
+                <p className="text-sm text-muted-foreground">
+                  ${priceRange[0]} - ${priceRange[1]}
+                </p>
               </div>
               <div>
                 <p className="font-medium mb-2">Sort By</p>
-                <Select className="w-full" value={sortBy} onChange={setSortBy}
+                <Select
+                  className="w-full"
+                  value={sortBy}
+                  onChange={setSortBy}
                   options={[
-                    { value: 'newest', label: 'Newest' },
-                    { value: 'price_asc', label: 'Price: Low to High' },
-                    { value: 'price_desc', label: 'Price: High to Low' },
-                    { value: 'rating', label: 'Top Rated' },
+                    { value: "newest", label: "Newest" },
+                    { value: "price_asc", label: "Price: Low to High" },
+                    { value: "price_desc", label: "Price: High to Low" },
+                    { value: "rating", label: "Top Rated" },
                   ]}
                 />
               </div>
             </div>
           </Col>
           <Col xs={24} md={18}>
-            <p className="text-muted-foreground mb-4">{filteredProducts.length} products found</p>
+            <p className="text-muted-foreground mb-4">
+              {filteredProducts.length} products found
+            </p>
             {filteredProducts.length === 0 ? (
               <Empty description="No products found" />
             ) : (
