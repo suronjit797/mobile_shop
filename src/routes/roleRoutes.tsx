@@ -1,6 +1,6 @@
-import { Navigate, Outlet } from 'react-router-dom';
-import { useAppSelector } from '../app/hooks';
-import type { UserRole } from '../types';
+import { Navigate, Outlet } from "react-router-dom";
+import { useAppSelector } from "../redux/store";
+import type { UserRole } from "../types";
 
 interface RoleRouteProps {
   allowedRoles: UserRole[];

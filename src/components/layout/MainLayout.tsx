@@ -21,7 +21,7 @@ import {
   useNavigate,
   useSearchParams
 } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { APP_NAME } from "../../constants";
 import { logout } from "../../features/auth/authSlice";
 import { UserRole } from "../../types";

@@ -1,10 +1,17 @@
-import { Card, Rate, Button, Tag } from 'antd';
-import { ShoppingCartOutlined, HeartOutlined, HeartFilled } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { addToCart } from '../../features/cart/cartSlice';
-import { addToWishlist, removeFromWishlist } from '../../features/wishlist/wishlistSlice';
-import type { Product } from '../../types';
+import { Card, Rate, Button, Tag } from "antd";
+import {
+  ShoppingCartOutlined,
+  HeartOutlined,
+  HeartFilled,
+} from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
+import { addToCart } from "../../features/cart/cartSlice";
+import {
+  addToWishlist,
+  removeFromWishlist,
+} from "../../features/wishlist/wishlistSlice";
+import type { Product } from "../../types";
 
 interface ProductCardProps {
   product: Product;
@@ -17,7 +24,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const isWishlisted = wishlistItems.some((i) => i.product.id === product.id);
 
   const discount = product.originalPrice
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    ? Math.round(
+        ((product.originalPrice - product.price) / product.originalPrice) * 100,
+      )
     : 0;
 
   return (
@@ -27,7 +36,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       cover={
         <div className="relative overflow-hidden bg-muted aspect-square">
           <img
-            src={product.images[0] || '/placeholder.svg'}
+            src={product.images[0] || "/placeholder.svg"}
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
             onClick={() => navigate(`/products/${product.id}`)}
@@ -41,7 +50,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
             type="text"
             shape="circle"
             className="absolute top-2 right-2 bg-card shadow-md"
-            icon={isWishlisted ? <HeartFilled className="text-red-500" /> : <HeartOutlined />}
+            icon={
+              isWishlisted ? (
+                <HeartFilled className="text-red-500" />
+              ) : (
+                <HeartOutlined />
+              )
+            }
             onClick={() =>
               isWishlisted
                 ? dispatch(removeFromWishlist(product.id))
@@ -52,7 +67,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
       }
     >
       <div className="flex flex-col gap-2">
-        <span className="text-xs text-muted-foreground uppercase tracking-wider">{product.brand}</span>
+        <span className="text-xs text-muted-foreground uppercase tracking-wider">
+          {product.brand}
+        </span>
         <h3
           className="font-semibold text-sm line-clamp-2 cursor-pointer hover:text-primary transition-colors"
           onClick={() => navigate(`/products/${product.id}`)}
@@ -60,12 +77,21 @@ const ProductCard = ({ product }: ProductCardProps) => {
           {product.name}
         </h3>
         <div className="flex items-center gap-1">
-          <Rate disabled defaultValue={product.rating} allowHalf className="text-xs" />
-          <span className="text-xs text-muted-foreground">({product.reviewCount})</span>
+          <Rate
+            disabled
+            defaultValue={product.rating}
+            allowHalf
+            className="text-xs"
+          />
+          <span className="text-xs text-muted-foreground">
+            ({product.reviewCount})
+          </span>
         </div>
         <div className="flex items-center justify-between mt-1">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-lg">${product.price.toFixed(2)}</span>
+            <span className="font-bold text-lg">
+              ${product.price.toFixed(2)}
+            </span>
             {product.originalPrice && (
               <span className="text-muted-foreground line-through text-sm">
                 ${product.originalPrice.toFixed(2)}
