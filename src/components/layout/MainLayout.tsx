@@ -24,7 +24,8 @@ import {
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { APP_NAME } from "../../constants";
 import { logout } from "../../features/auth/authSlice";
-import { UserRole } from "../../types";
+import { UserRole } from "@/interfaces/userInterface";
+
 
 const { Header, Content, Footer } = Layout;
 

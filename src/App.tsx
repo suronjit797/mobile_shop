@@ -1,12 +1,14 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ConfigProvider, Spin } from "antd";
-import { UserRole } from "./types";
 import RoleRoute from "./routes/roleRoutes";
 import PrivateRoute from "./routes/privateRoutes";
 import PublicRoute from "./routes/publicRoutes";
 import AdminLayout from "./components/layout/AdminLayout";
 import SellerLayout from "./components/layout/SellerLayout";
+import { UserRole } from "./interfaces/userInterface";
+import CategoryListPage from "./pages/Category/CategoryListPage";
+import AdminCategory from "./admin/category/AdminCategory";
 
 // Lazy loaded pages
 const HomePage = lazy(() => import("./pages/Home/HomePage"));
@@ -81,7 +83,7 @@ const App = () => (
               <Route path="/admin/products" element={<AdminProducts />} />
               <Route path="/admin/orders" element={<AdminOrders />} />
               <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/categories" element={<div>Categories Management</div>} />
+              <Route path="/admin/categories" element={<AdminCategory />} />
               <Route path="/admin/sellers" element={<div>Seller Management</div>} />
               <Route path="/admin/analytics" element={<div>Analytics Dashboard</div>} />
             </Route>

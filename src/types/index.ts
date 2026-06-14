@@ -1,19 +1,3 @@
-export enum UserRole {
-  SUPER_ADMIN = 'SUPER_ADMIN',
-  ADMIN = 'ADMIN',
-  SELLER = 'SELLER',
-  USER = 'USER',
-}
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  avatar?: string;
-  phone?: string;
-  address?: Address;
-}
 
 export interface Address {
   street: string;
@@ -66,10 +50,7 @@ export interface Category {
   image?: string;
 }
 
-export interface AuthResponse {
-  accessToken: string;
-  user: User;
-}
+
 
 export interface PaginatedResponse<T> {
   data: T[];

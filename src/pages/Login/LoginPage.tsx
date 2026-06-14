@@ -1,3 +1,4 @@
+import { setCredentials } from "@/features/auth/authSlice";
 import { useLoginMutation } from "@/redux/api/usersApi";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
 import {
@@ -9,20 +10,15 @@ import {
   notification,
   Typography,
 } from "antd";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
 import { APP_NAME } from "../../constants";
 import { useAppDispatch } from "../../redux/store";
-import { setCredentials } from "@/features/auth/authSlice";
 
 const { Title, Text } = Typography;
 
 const LoginPage = () => {
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const [loading, setLoading] = useState(false);
-
   const [login, { isLoading }] = useLoginMutation();
 
   const handleLogin = async (values: { email: string; password: string }) => {
@@ -76,7 +72,12 @@ const LoginPage = () => {
               />
             </Form.Item>
             <Form.Item>
-              <Button type="primary" htmlType="submit" block loading={loading}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
+                loading={isLoading}
+              >
                 Sign In
               </Button>
             </Form.Item>
