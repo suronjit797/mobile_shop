@@ -27,7 +27,7 @@ const AdminLayout = () => {
     { key: '/admin/orders', icon: <OrderedListOutlined />, label: <Link to="/admin/orders">Orders</Link> },
     { key: '/admin/users', icon: <UserOutlined />, label: <Link to="/admin/users">Users</Link> },
     { key: '/admin/sellers', icon: <TeamOutlined />, label: <Link to="/admin/sellers">Sellers</Link> },
-    { key: '/admin/analytics', icon: <BarChartOutlined />, label: <Link to="/admin/analytics">Analytics</Link> },
+    // { key: '/admin/analytics', icon: <BarChartOutlined />, label: <Link to="/admin/analytics">Analytics</Link> },
   ];
 
   return (

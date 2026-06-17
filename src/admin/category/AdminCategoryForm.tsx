@@ -2,14 +2,15 @@ import React, { useEffect } from "react";
 import { Drawer, Form, Input, Button, Space, message } from "antd";
 import { ICategory } from "@/interfaces/category.interface";
 import { useCreateCategoryMutation, useUpdateCategoryMutation } from "@/redux/api/categoryApi";
-import { IFormDrawerState } from "./AdminCategory";
+import { IFormDrawerState } from "@/interfaces/globalInterface";
 
-interface CategoryDrawerProps {
-  formDrawer?: IFormDrawerState;
-  setFromDrawer?: React.Dispatch<React.SetStateAction<IFormDrawerState>>;
+
+interface Props {
+  formDrawer?: IFormDrawerState<ICategory>;
+  setFromDrawer?: React.Dispatch<React.SetStateAction<IFormDrawerState<ICategory>>>;
 }
 
-const AdminCategoryForm: React.FC<CategoryDrawerProps> = ({ formDrawer, setFromDrawer }) => {
+const AdminCategoryForm: React.FC<Props> = ({ formDrawer, setFromDrawer }) => {
   const { data } = formDrawer || {};
   const [form] = Form.useForm();
 
@@ -59,7 +60,6 @@ const AdminCategoryForm: React.FC<CategoryDrawerProps> = ({ formDrawer, setFromD
       form={form}
       layout="vertical"
       onFinish={handleFinish}
-      requiredMark={false} // Hidden red asterisks for a cleaner UI
       className="space-y-4"
     >
       {/* Name Field */}

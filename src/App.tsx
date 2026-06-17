@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { ConfigProvider, Spin } from "antd";
+import { ConfigProvider, Spin, App as AntApp } from "antd";
 import RoleRoute from "./routes/roleRoutes";
 import PrivateRoute from "./routes/privateRoutes";
 import PublicRoute from "./routes/publicRoutes";
@@ -53,56 +53,58 @@ const antdTheme = {
 
 const App = () => (
   <ConfigProvider theme={antdTheme}>
-    <BrowserRouter>
-      <Suspense fallback={<Loading />}>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/products" element={<ProductListPage />} />
-          <Route path="/products/:id" element={<ProductDetailPage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/wishlist" element={<WishlistPage />} />
+    <AntApp>
+      <BrowserRouter>
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/products" element={<ProductListPage />} />
+            <Route path="/products/:id" element={<ProductDetailPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
 
-          {/* Auth routes (redirect if logged in) */}
-          <Route element={<PublicRoute />}>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-          </Route>
-
-          {/* Protected routes (must be logged in) */}
-          <Route element={<PrivateRoute />}>
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/orders" element={<OrdersPage />} />
-          </Route>
-
-          {/* Admin routes */}
-          <Route element={<RoleRoute allowedRoles={[UserRole.ADMIN, UserRole.SUPER_ADMIN]} />}>
-            <Route element={<AdminLayout />}>
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/products" element={<AdminProducts />} />
-              <Route path="/admin/orders" element={<AdminOrders />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/categories" element={<AdminCategory />} />
-              <Route path="/admin/sellers" element={<div>Seller Management</div>} />
-              <Route path="/admin/analytics" element={<div>Analytics Dashboard</div>} />
+            {/* Auth routes (redirect if logged in) */}
+            <Route element={<PublicRoute />}>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
             </Route>
-          </Route>
 
-          {/* Seller routes */}
-          <Route element={<RoleRoute allowedRoles={[UserRole.SELLER]} />}>
-            <Route element={<SellerLayout />}>
-              <Route path="/seller" element={<SellerDashboard />} />
-              <Route path="/seller/products" element={<SellerProducts />} />
-              <Route path="/seller/orders" element={<SellerOrders />} />
-              <Route path="/seller/inventory" element={<div>Inventory Management</div>} />
+            {/* Protected routes (must be logged in) */}
+            <Route element={<PrivateRoute />}>
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/orders" element={<OrdersPage />} />
             </Route>
-          </Route>
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
-    </BrowserRouter>
+            {/* Admin routes */}
+            <Route element={<RoleRoute allowedRoles={[UserRole.ADMIN, UserRole.SUPER_ADMIN]} />}>
+              <Route element={<AdminLayout />}>
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/products" element={<AdminProducts />} />
+                <Route path="/admin/orders" element={<AdminOrders />} />
+                <Route path="/admin/users" element={<AdminUsers role={UserRole.USER} />} />
+                <Route path="/admin/categories" element={<AdminCategory />} />
+                <Route path="/admin/sellers" element={<AdminUsers role={UserRole.SELLER} />} />
+                <Route path="/admin/analytics" element={<div>Analytics Dashboard</div>} />
+              </Route>
+            </Route>
+
+            {/* Seller routes */}
+            <Route element={<RoleRoute allowedRoles={[UserRole.SELLER]} />}>
+              <Route element={<SellerLayout />}>
+                <Route path="/seller" element={<SellerDashboard />} />
+                <Route path="/seller/products" element={<SellerProducts />} />
+                <Route path="/seller/orders" element={<SellerOrders />} />
+                <Route path="/seller/inventory" element={<div>Inventory Management</div>} />
+              </Route>
+            </Route>
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </AntApp>
   </ConfigProvider>
 );
 
