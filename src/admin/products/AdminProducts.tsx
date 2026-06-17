@@ -1,13 +1,12 @@
-import { Table, Button, Tag, Typography, Space, Card, TableProps, Drawer, App, Image } from "antd";
-import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import { mockProducts } from "../../utils/mockData";
-import { IProduct } from "@/interfaces/product.interface";
 import CustomTable from "@/components/CustomTable";
 import { useQueryParams } from "@/hooks/useQueryParams";
-import { useDeleteProductMutation, useGetAllProductQuery } from "@/redux/api/productApi";
 import { IFormDrawerState } from "@/interfaces/globalInterface";
-import { useState } from "react";
+import { IProduct } from "@/interfaces/product.interface";
 import { globalModalProps } from "@/lib/utils";
+import { useDeleteProductMutation, useGetAllProductQuery } from "@/redux/api/productApi";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { App, Button, Card, Drawer, Image, Space, TableProps, Tag, Typography } from "antd";
+import { useState } from "react";
 import AdminProductForm from "./AdminProductForm";
 
 const { Title } = Typography;

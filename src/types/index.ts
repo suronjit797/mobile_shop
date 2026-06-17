@@ -23,15 +23,15 @@ export interface Product {
   createdAt: string;
 }
 
-export interface CartItem {
-  product: Product;
-  quantity: number;
-}
+// export interface CartItem {
+//   product: Product;
+//   quantity: number;
+// }
 
-export interface WishlistItem {
-  product: Product;
-  addedAt: string;
-}
+// export interface WishlistItem {
+//   product: Product;
+//   addedAt: string;
+// }
 
 export interface Order {
   id: string;

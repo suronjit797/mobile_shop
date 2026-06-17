@@ -1,23 +1,22 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Carousel, Button, Card, Row, Col, Tag, Input, Typography } from "antd";
-import {
-  RightOutlined,
-  ThunderboltOutlined,
-  TruckOutlined,
-  SafetyCertificateOutlined,
-  CustomerServiceOutlined,
-} from "@ant-design/icons";
+import { RightOutlined, ThunderboltOutlined, TruckOutlined, SafetyCertificateOutlined, CustomerServiceOutlined } from "@ant-design/icons";
 import MainLayout from "../../components/layout/MainLayout";
 import ProductCard from "../../components/product/ProductCard";
 import { mockProducts, mockCategories } from "../../utils/mockData";
+import { useGetAllCategoryQuery } from "@/redux/api/categoryApi";
+import { useGetAllProductQuery } from "@/redux/api/productApi";
 
 const { Title, Paragraph } = Typography;
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const featuredProducts = mockProducts.slice(0, 4);
-  const dealProducts = mockProducts.filter((p) => p.originalPrice);
+
+  // rkt query
+  const { data: categories, isFetching: isFetchingCategories } = useGetAllCategoryQuery({ page: 1, limit: 6 });
+  const { data: featuredProducts, isFetching: isFetchingFeaturedProducts } = useGetAllProductQuery({ page: 1, limit: 4 });
+  const { data: dealProducts, isFetching: isFetchingDealProducts } = useGetAllProductQuery({ page: 1, limit: 12 });
 
   const features = [
     {
@@ -52,47 +51,30 @@ const HomePage = () => {
               <Tag color="blue" className="mb-4">
                 New Collection 2026
               </Tag>
-              <Title
-                level={1}
-                className="!text-4xl lg:!text-6xl !font-extrabold !mb-4 !leading-tight"
-              >
-                Discover Your{" "}
-                <span className="text-primary">Perfect Style</span>
+              <Title level={1} className="!text-4xl lg:!text-6xl !font-extrabold !mb-4 !leading-tight">
+                Discover Your <span className="text-primary">Perfect Style</span>
               </Title>
               <Paragraph className="text-lg text-muted-foreground mb-8 max-w-lg">
-                Shop the latest trends with exclusive deals. Quality products,
-                unbeatable prices, and fast delivery.
+                Shop the latest trends with exclusive deals. Quality products, unbeatable prices, and fast delivery.
               </Paragraph>
               <div className="flex gap-3">
-                <Button
-                  type="primary"
-                  size="large"
-                  onClick={() => navigate("/products")}
-                >
+                <Button type="primary" size="large" onClick={() => navigate("/products")}>
                   Shop Now <RightOutlined />
                 </Button>
-                <Button
-                  size="large"
-                  onClick={() => navigate("/products?category=Smartphones")}
-                >
+                <Button size="large" onClick={() => navigate("/products?category=Smartphones")}>
                   Explore Deals
                 </Button>
               </div>
             </Col>
             <Col xs={24} lg={12}>
               <div className="grid grid-cols-2 gap-4">
-                {featuredProducts.slice(0, 4).map((p) => (
-                  <div
-                    key={p.id}
-                    className="rounded-xl overflow-hidden shadow-lg"
-                  >
-                    <img
-                      src={p.images[0]}
-                      alt={p.name}
-                      className="w-full h-48 object-cover"
-                    />
-                  </div>
-                ))}
+                {Array.isArray(featuredProducts?.data)
+                  ? featuredProducts?.data?.map((p) => (
+                      <div key={p._id} className="rounded-xl overflow-hidden shadow-lg">
+                        <img src={p.images[0]} alt={p.name} className="w-full h-48 object-cover" />
+                      </div>
+                    ))
+                  : []}
               </div>
             </Col>
           </Row>
@@ -128,17 +110,15 @@ const HomePage = () => {
             </Link>
           </div>
           <Row gutter={[16, 16]} justify="center">
-            {mockCategories.map((cat) => (
-              <Col xs={12} sm={8} md={4} key={cat.id}>
-                <Card
-                  hoverable
-                  className="text-center"
-                  onClick={() => navigate(`/products?category=${cat.slug}`)}
-                >
-                  <p className="font-medium">{cat.name}</p>
-                </Card>
-              </Col>
-            ))}
+            {Array.isArray(categories?.data)
+              ? categories?.data.map((cat) => (
+                  <Col xs={12} sm={8} md={4} key={cat._id}>
+                    <Card hoverable className="text-center" onClick={() => navigate(`/products?category=${cat.slug}`)}>
+                      <p className="font-medium">{cat.name}</p>
+                    </Card>
+                  </Col>
+                ))
+              : []}
           </Row>
         </div>
       </section>
@@ -155,17 +135,19 @@ const HomePage = () => {
             </Link>
           </div>
           <Row gutter={[16, 16]}>
-            {featuredProducts.map((product) => (
-              <Col xs={12} sm={8} md={6} key={product.id}>
-                <ProductCard product={product} />
-              </Col>
-            ))}
+            {Array.isArray(featuredProducts?.data)
+              ? featuredProducts?.data?.map((p) => (
+                  <div key={p._id} className="rounded-xl overflow-hidden shadow-lg">
+                    <img src={p.images[0]} alt={p.name} className="w-full h-48 object-cover" />
+                  </div>
+                ))
+              : []}
           </Row>
         </div>
       </section>
 
       {/* Deals */}
-      {dealProducts.length > 0 && (
+      {Array.isArray(dealProducts?.data) && dealProducts?.data?.length > 0 && (
         <section className="py-16">
           <div className="container-main">
             <div className="flex items-center justify-between mb-8">
@@ -175,7 +157,7 @@ const HomePage = () => {
               </Title>
             </div>
             <Row gutter={[16, 16]}>
-              {dealProducts.map((product) => (
+              {dealProducts?.data?.map((product) => (
                 <Col xs={12} sm={8} md={6} key={product.id}>
                   <ProductCard product={product} />
                 </Col>
@@ -189,16 +171,9 @@ const HomePage = () => {
       <section className="py-16 bg-primary/5">
         <div className="container-main text-center max-w-2xl mx-auto">
           <Title level={2}>Stay in the Loop</Title>
-          <Paragraph className="text-muted-foreground mb-6">
-            Subscribe to get special offers, free giveaways, and
-            once-in-a-lifetime deals.
-          </Paragraph>
+          <Paragraph className="text-muted-foreground mb-6">Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.</Paragraph>
           <div className="flex gap-2 max-w-md mx-auto">
-            <Input
-              placeholder="Enter your email"
-              size="large"
-              className="flex-1"
-            />
+            <Input placeholder="Enter your email" size="large" className="flex-1" />
             <Button type="primary" size="large">
               Subscribe
             </Button>
