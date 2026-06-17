@@ -14,7 +14,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const wishlistItems = useAppSelector((state) => state.wishlist.items);
-  const isWishlisted = wishlistItems.some((i) => i.product.id === product.id);
+  const isWishlisted = wishlistItems.some((i) => i.product._id === product._id);
 
   const discount = product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
 
@@ -28,7 +28,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             src={product.images[0] || "/placeholder.svg"}
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-            onClick={() => navigate(`/products/${product.id}`)}
+            onClick={() => navigate(`/products/${product._id}`)}
           />
           {discount > 0 && (
             <Tag color="#f50" className="absolute top-2 left-2">
@@ -38,9 +38,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <Button
             type="text"
             shape="circle"
-            className="absolute top-2 right-2 bg-card shadow-md"
+            className="absolute top-2 right-2 bg-card shadow-md hover:!bg-gray-300"
             icon={isWishlisted ? <HeartFilled className="text-red-500" /> : <HeartOutlined />}
-            onClick={() => (isWishlisted ? dispatch(removeFromWishlist(product.id)) : dispatch(addToWishlist(product)))}
+            onClick={() => (isWishlisted ? dispatch(removeFromWishlist(product._id)) : dispatch(addToWishlist(product)))}
           />
         </div>
       }
@@ -49,7 +49,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         <span className="text-xs text-muted-foreground uppercase tracking-wider">{product.brand}</span>
         <h3
           className="font-semibold text-sm line-clamp-2 cursor-pointer hover:text-primary transition-colors"
-          onClick={() => navigate(`/products/${product.id}`)}
+          onClick={() => navigate(`/products/${product._id}`)}
         >
           {product.name}
         </h3>

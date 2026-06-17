@@ -1,11 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { Button, Empty, Table, message } from "antd";
+import { Button, Empty, Table, TableColumnProps, message } from "antd";
 import { ShoppingCartOutlined, DeleteOutlined } from "@ant-design/icons";
 import MainLayout from "../../components/layout/MainLayout";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
 import { removeFromWishlist } from "../../features/wishlist/wishlistSlice";
 import { addToCart } from "../../features/cart/cartSlice";
 import { Typography } from "antd";
+import { IProduct } from "@/interfaces/product.interface";
 
 const { Title } = Typography;
 
@@ -28,27 +29,18 @@ const WishlistPage = () => {
     );
   }
 
-  const columns = [
+  const columns: TableColumnProps<{ product: IProduct; addedAt: string }>[] = [
     {
       title: "Product",
       key: "product",
-      render: (_: any, record: any) => (
+      render: (_, record) => (
         <div className="flex items-center gap-3">
-          <img
-            src={record.product.images[0]}
-            alt={record.product.name}
-            className="w-16 h-16 object-cover rounded-lg"
-          />
+          <img src={record.product.images[0]} alt={record.product.name} className="w-16 h-16 object-cover rounded-lg" />
           <div>
-            <p
-              className="font-medium cursor-pointer hover:text-primary"
-              onClick={() => navigate(`/products/${record.product.id}`)}
-            >
+            <p className="font-medium cursor-pointer hover:text-primary" onClick={() => navigate(`/products/${record.product._id}`)}>
               {record.product.name}
             </p>
-            <p className="text-sm text-muted-foreground">
-              {record.product.brand}
-            </p>
+            <p className="text-sm text-muted-foreground">{record.product.brand}</p>
           </div>
         </div>
       ),
@@ -56,29 +48,19 @@ const WishlistPage = () => {
     {
       title: "Price",
       key: "price",
-      render: (_: any, record: any) => (
-        <span className="font-semibold">
-          ${record.product.price.toFixed(2)}
-        </span>
-      ),
+      render: (_, record) => <span className="font-semibold">${record.product.price.toFixed(2)}</span>,
     },
     {
       title: "Stock",
       key: "stock",
-      render: (_: any, record: any) => (
-        <span
-          className={
-            record.product.stock > 0 ? "text-green-600" : "text-red-500"
-          }
-        >
-          {record.product.stock > 0 ? "In Stock" : "Out of Stock"}
-        </span>
+      render: (_, record) => (
+        <span className={record.product.stock > 0 ? "text-green-600" : "text-red-500"}>{record.product.stock > 0 ? "In Stock" : "Out of Stock"}</span>
       ),
     },
     {
       title: "Actions",
       key: "actions",
-      render: (_: any, record: any) => (
+      render: (_, record) => (
         <div className="flex gap-2">
           <Button
             type="primary"
@@ -86,7 +68,7 @@ const WishlistPage = () => {
             icon={<ShoppingCartOutlined />}
             onClick={() => {
               dispatch(addToCart(record.product));
-              dispatch(removeFromWishlist(record.product.id));
+              dispatch(removeFromWishlist(record.product._id));
               message.success("Moved to cart");
             }}
             disabled={record.product.stock === 0}
@@ -98,7 +80,7 @@ const WishlistPage = () => {
             size="small"
             icon={<DeleteOutlined />}
             onClick={() => {
-              dispatch(removeFromWishlist(record.product.id));
+              dispatch(removeFromWishlist(record.product._id));
               message.success("Removed from wishlist");
             }}
           />
@@ -111,12 +93,7 @@ const WishlistPage = () => {
     <MainLayout>
       <div className="container-main py-8">
         <Title level={2}>My Wishlist ({items.length} items)</Title>
-        <Table
-          dataSource={items}
-          columns={columns}
-          rowKey={(r) => r.product.id}
-          pagination={false}
-        />
+        <Table dataSource={items} columns={columns} rowKey={(r) => r.product._id} pagination={false} />
       </div>
     </MainLayout>
   );

@@ -1,6 +1,6 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { IProduct } from '@/interfaces/product.interface';
-import { CartItem } from '@/interfaces/globalInterface';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { IProduct } from "@/interfaces/product.interface";
+import { CartItem } from "@/interfaces/globalInterface";
 
 interface CartState {
   items: CartItem[];
@@ -11,11 +11,11 @@ const initialState: CartState = {
 };
 
 const cartSlice = createSlice({
-  name: 'cart',
+  name: "cart",
   initialState,
   reducers: {
     addToCart: (state, action: PayloadAction<IProduct>) => {
-      const existing = state.items.find(i => i.product.id === action.payload.id);
+      const existing = state.items.find((i) => i.product._id === action.payload._id);
       if (existing) {
         existing.quantity += 1;
       } else {
@@ -23,10 +23,10 @@ const cartSlice = createSlice({
       }
     },
     removeFromCart: (state, action: PayloadAction<string>) => {
-      state.items = state.items.filter(i => i.product.id !== action.payload);
+      state.items = state.items.filter((i) => i.product._id !== action.payload);
     },
     updateQuantity: (state, action: PayloadAction<{ productId: string; quantity: number }>) => {
-      const item = state.items.find(i => i.product.id === action.payload.productId);
+      const item = state.items.find((i) => i.product._id === action.payload.productId);
       if (item) {
         item.quantity = Math.max(1, action.payload.quantity);
       }

@@ -1,13 +1,9 @@
-import { useNavigate } from "react-router-dom";
-import { Button, InputNumber, Table, Typography, Empty, message } from "antd";
 import { DeleteOutlined, ShoppingOutlined } from "@ant-design/icons";
+import { Button, Empty, InputNumber, message, Table, Typography } from "antd";
+import { useNavigate } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
-import { useAppSelector, useAppDispatch } from "../../redux/store";
-import {
-  removeFromCart,
-  updateQuantity,
-  clearCart,
-} from "../../features/cart/cartSlice";
+import { clearCart, removeFromCart, updateQuantity } from "../../features/cart/cartSlice";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 
 const { Title } = Typography;
 
@@ -23,10 +19,7 @@ const CartPage = () => {
     return (
       <MainLayout>
         <div className="container-main py-16 text-center">
-          <Empty
-            description="Your cart is empty"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-          >
+          <Empty description="Your cart is empty" image={Empty.PRESENTED_IMAGE_SIMPLE}>
             <Button type="primary" onClick={() => navigate("/products")}>
               Continue Shopping
             </Button>
@@ -41,23 +34,14 @@ const CartPage = () => {
       title: "Product",
       dataIndex: "product",
       key: "product",
-      render: (_: any, record: any) => (
+      render: (_, record) => (
         <div className="flex items-center gap-3">
-          <img
-            src={record.product.images[0]}
-            alt={record.product.name}
-            className="w-16 h-16 object-cover rounded-lg"
-          />
+          <img src={record.product.images[0]} alt={record.product.name} className="w-16 h-16 object-cover rounded-lg" />
           <div>
-            <p
-              className="font-medium cursor-pointer hover:text-primary"
-              onClick={() => navigate(`/products/${record.product.id}`)}
-            >
+            <p className="font-medium cursor-pointer hover:text-primary" onClick={() => navigate(`/products/${record.product._id}`)}>
               {record.product.name}
             </p>
-            <p className="text-sm text-muted-foreground">
-              {record.product.brand}
-            </p>
+            <p className="text-sm text-muted-foreground">{record.product.brand}</p>
           </div>
         </div>
       ),
@@ -65,16 +49,12 @@ const CartPage = () => {
     {
       title: "Price",
       key: "price",
-      render: (_: any, record: any) => (
-        <span className="font-semibold">
-          ${record.product.price.toFixed(2)}
-        </span>
-      ),
+      render: (_, record) => <span className="font-semibold">${record.product.price.toFixed(2)}</span>,
     },
     {
       title: "Quantity",
       key: "quantity",
-      render: (_: any, record: any) => (
+      render: (_, record) => (
         <InputNumber
           min={1}
           max={record.product.stock}
@@ -82,7 +62,7 @@ const CartPage = () => {
           onChange={(v) =>
             dispatch(
               updateQuantity({
-                productId: record.product.id,
+                productId: record.product._id,
                 quantity: v || 1,
               }),
             )
@@ -93,22 +73,18 @@ const CartPage = () => {
     {
       title: "Total",
       key: "total",
-      render: (_: any, record: any) => (
-        <span className="font-bold">
-          ${(record.product.price * record.quantity).toFixed(2)}
-        </span>
-      ),
+      render: (_, record) => <span className="font-bold">${(record.product.price * record.quantity).toFixed(2)}</span>,
     },
     {
       title: "",
       key: "action",
-      render: (_: any, record: any) => (
+      render: (_, record) => (
         <Button
           danger
           type="text"
           icon={<DeleteOutlined />}
           onClick={() => {
-            dispatch(removeFromCart(record.product.id));
+            dispatch(removeFromCart(record.product._id));
             message.success("Removed from cart");
           }}
         />
@@ -122,16 +98,9 @@ const CartPage = () => {
         <Title level={2}>Shopping Cart ({itemCount} items)</Title>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <Table
-              dataSource={items}
-              columns={columns}
-              rowKey={(r) => r.product.id}
-              pagination={false}
-            />
+            <Table dataSource={items} columns={columns} rowKey={(r) => r.product._id} pagination={false} />
             <div className="flex gap-2 mt-4">
-              <Button onClick={() => navigate("/products")}>
-                Continue Shopping
-              </Button>
+              <Button onClick={() => navigate("/products")}>Continue Shopping</Button>
               <Button
                 danger
                 onClick={() => {
@@ -159,13 +128,7 @@ const CartPage = () => {
                 <span>${(total > 50 ? total : total + 5.99).toFixed(2)}</span>
               </div>
             </div>
-            <Button
-              type="primary"
-              block
-              size="large"
-              icon={<ShoppingOutlined />}
-              onClick={() => navigate("/checkout")}
-            >
+            <Button type="primary" block size="large" icon={<ShoppingOutlined />} onClick={() => navigate("/checkout")}>
               Proceed to Checkout
             </Button>
           </div>

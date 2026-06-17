@@ -1,59 +1,35 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Row, Col, Select, Input, Slider, Typography, Empty } from "antd";
+import { Row, Col, Select, Input, Slider, Typography, Empty, App } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import MainLayout from "../../components/layout/MainLayout";
 import ProductCard from "../../components/product/ProductCard";
 import { mockProducts, mockCategories } from "../../utils/mockData";
+import { useQueryParams } from "@/hooks/useQueryParams";
+import { useDeleteProductMutation, useGetAllProductQuery } from "@/redux/api/productApi";
+import { useGetAllCategoryQuery } from "@/redux/api/categoryApi";
 
 const { Title } = Typography;
 
 const ProductListPage = () => {
+  const { queryParams, setQueryParams, getNonEmptyQueryParams } = useQueryParams({ page: 1, limit: 10, price_lte: 10000, price_gte: 0 });
+  const { modal, notification } = App.useApp();
+
+  const { category, price_lte, price_gte, sortBy, sortOrder } = queryParams;
+
+  // rkt query
+  const { data: product, isFetching: productFetching } = useGetAllProductQuery({ ...getNonEmptyQueryParams });
+  const { data: categories, isFetching: categoryFetching } = useGetAllCategoryQuery({ page: 1, limit: 100 });
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const searchParamsValue = searchParams.get("search");
   const searchParamsCategory = searchParams.get("category");
 
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<undefined | string>();
-  const [sortBy, setSortBy] = useState("newest");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
-
-  const filteredProducts = useMemo(() => {
-    let result = [...mockProducts];
-    if (search)
-      result = result.filter((p) =>
-        p.name.toLowerCase().includes(search.toLowerCase()),
-      );
-    if (category)
-      result = result.filter((p) => {
-        return p.category?.toLowerCase()?.includes(category?.toLowerCase());
-      });
-
-    result = result.filter(
-      (p) => p.price >= priceRange[0] && p.price <= priceRange[1],
-    );
-    console.log({ result });
-    switch (sortBy) {
-      case "price_asc":
-        result.sort((a, b) => a.price - b.price);
-        break;
-      case "price_desc":
-        result.sort((a, b) => b.price - a.price);
-        break;
-      case "rating":
-        result.sort((a, b) => b.rating - a.rating);
-        break;
-      default:
-        break;
-    }
-    return result;
-  }, [search, category, sortBy, priceRange]);
-
-  useEffect(() => {
-    setSearch(searchParamsValue || "");
-    setCategory(searchParamsCategory || undefined);
-  }, [searchParamsValue, searchParamsCategory]);
+  // const [category, setCategory] = useState<undefined | string>();
+  // const [sortBy, setSortBy] = useState("newest");
+  // const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
 
   const searchChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -89,13 +65,17 @@ const ProductListPage = () => {
                 <Select
                   className="w-full"
                   value={category}
-                  onChange={setCategory}
+                  onChange={(value) => setQueryParams({ category: value })}
                   allowClear
                   placeholder="All Categories"
-                  options={mockCategories.map((c) => ({
-                    value: c.slug,
-                    label: c.name,
-                  }))}
+                  options={
+                    Array.isArray(categories?.data)
+                      ? categories?.data?.map((c) => ({
+                          value: c._id,
+                          label: c.name,
+                        }))
+                      : []
+                  }
                 />
               </div>
               <div>
@@ -103,43 +83,46 @@ const ProductListPage = () => {
                 <Slider
                   range
                   min={0}
-                  max={1000}
-                  value={priceRange}
-                  onChange={(v) => setPriceRange(v as [number, number])}
+                  max={10000}
+                  value={[Number(price_gte), Number(price_lte)]}
+                  onChange={(v) => setQueryParams({ price_gte: v[0], price_lte: v[1] })}
                 />
                 <p className="text-sm text-muted-foreground">
-                  ${priceRange[0]} - ${priceRange[1]}
+                  ${price_gte} - ${price_lte}
                 </p>
               </div>
               <div>
                 <p className="font-medium mb-2">Sort By</p>
                 <Select
                   className="w-full"
-                  value={sortBy}
-                  onChange={setSortBy}
+                  value={sortBy && sortOrder ? `${sortBy}_${sortOrder}` : ""}
+                  onChange={(value) => {
+                    const [sortBy, sortOrder] = value.split("_");
+                    setQueryParams({ sortBy, sortOrder });
+                  }}
                   options={[
-                    { value: "newest", label: "Newest" },
+                    { value: "createdAt_desc", label: "Newest" },
                     { value: "price_asc", label: "Price: Low to High" },
                     { value: "price_desc", label: "Price: High to Low" },
-                    { value: "rating", label: "Top Rated" },
+                    { value: "rating_desc", label: "Top Rated" },
                   ]}
                 />
               </div>
             </div>
           </Col>
           <Col xs={24} md={18}>
-            <p className="text-muted-foreground mb-4">
-              {filteredProducts.length} products found
-            </p>
-            {filteredProducts.length === 0 ? (
+            <p className="text-muted-foreground mb-4">{product?.data?.length} products found</p>
+            {product?.data?.length === 0 ? (
               <Empty description="No products found" />
             ) : (
               <Row gutter={[16, 16]}>
-                {filteredProducts.map((product) => (
-                  <Col xs={12} sm={8} key={product.id}>
-                    <ProductCard product={product} />
-                  </Col>
-                ))}
+                {Array.isArray(product?.data)
+                  ? product?.data?.map((product) => (
+                      <Col xs={12} sm={8} key={product._id}>
+                        <ProductCard product={product} />
+                      </Col>
+                    ))
+                  : []}
               </Row>
             )}
           </Col>
