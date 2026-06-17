@@ -78,7 +78,7 @@ const AdminUsers: React.FC<Props> = ({ role }) => {
           <Button size="small" icon={<EditOutlined />} onClick={() => setFromDrawer({ open: true, mode: "update", data: record })}>
             Edit
           </Button>
-          <Button size="small" danger icon={<DeleteOutlined />} onClick={() => deleteHandler(record._id)} loading={removeLoading}>
+          <Button size="small" danger icon={<DeleteOutlined />} onClick={() => deleteHandler(record?._id)} loading={removeLoading}>
             Delete
           </Button>
         </Space>
