@@ -49,11 +49,13 @@ const CartPage = () => {
     {
       title: "Price",
       key: "price",
+      align: "center",
       render: (_, record) => <span className="font-semibold">${record.product.price.toFixed(2)}</span>,
     },
     {
       title: "Quantity",
       key: "quantity",
+      align: "center",
       render: (_, record) => (
         <InputNumber
           min={1}
@@ -73,11 +75,14 @@ const CartPage = () => {
     {
       title: "Total",
       key: "total",
+      align: "center",
       render: (_, record) => <span className="font-bold">${(record.product.price * record.quantity).toFixed(2)}</span>,
     },
     {
       title: "",
       key: "action",
+      align: "center",
+      width: 50,
       render: (_, record) => (
         <Button
           danger

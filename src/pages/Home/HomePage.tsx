@@ -113,7 +113,7 @@ const HomePage = () => {
             {Array.isArray(categories?.data)
               ? categories?.data.map((cat) => (
                   <Col xs={12} sm={8} md={4} key={cat._id}>
-                    <Card hoverable className="text-center" onClick={() => navigate(`/products?category=${cat.slug}`)}>
+                    <Card hoverable className="text-center" onClick={() => navigate(`/products?category=${cat._id}`)}>
                       <p className="font-medium">{cat.name}</p>
                     </Card>
                   </Col>

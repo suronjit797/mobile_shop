@@ -1,43 +1,61 @@
-import { useState, useMemo, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { Row, Col, Select, Input, Slider, Typography, Empty, App } from "antd";
+import { useQueryParams } from "@/hooks/useQueryParams";
+import { useGetAllCategoryQuery } from "@/redux/api/categoryApi";
+import { useGetAllProductQuery } from "@/redux/api/productApi";
 import { SearchOutlined } from "@ant-design/icons";
+import { Col, Empty, Input, Row, Select, Slider, Typography } from "antd";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
 import ProductCard from "../../components/product/ProductCard";
-import { mockProducts, mockCategories } from "../../utils/mockData";
-import { useQueryParams } from "@/hooks/useQueryParams";
-import { useDeleteProductMutation, useGetAllProductQuery } from "@/redux/api/productApi";
-import { useGetAllCategoryQuery } from "@/redux/api/categoryApi";
 
 const { Title } = Typography;
 
 const ProductListPage = () => {
-  const { queryParams, setQueryParams, getNonEmptyQueryParams } = useQueryParams({ page: 1, limit: 10, price_lte: 10000, price_gte: 0 });
-  const { modal, notification } = App.useApp();
-
+  const navigate = useNavigate();
+  const { queryParams, setQueryParams, getNonEmptyQueryParams } = useQueryParams({
+    page: 1,
+    limit: 10,
+    price_lte: 10000,
+    price_gte: 0,
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  });
   const { category, price_lte, price_gte, sortBy, sortOrder } = queryParams;
 
   // rkt query
   const { data: product, isFetching: productFetching } = useGetAllProductQuery({ ...getNonEmptyQueryParams });
   const { data: categories, isFetching: categoryFetching } = useGetAllCategoryQuery({ page: 1, limit: 100 });
 
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const searchParamsValue = searchParams.get("search");
-  const searchParamsCategory = searchParams.get("category");
-
   const [search, setSearch] = useState("");
-  // const [category, setCategory] = useState<undefined | string>();
-  // const [sortBy, setSortBy] = useState("newest");
-  // const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [priceRange, setPriceRange] = useState([0, 5000]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (search) {
+        setQueryParams({ search });
+      } else {
+        navigate("/products");
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setQueryParams({
+        price_gte: priceRange[0],
+        price_lte: priceRange[1],
+      });
+    }, 500);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [priceRange]);
 
   const searchChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-    if (e.target.value) {
-      navigate(`/products?search=${encodeURIComponent(e.target.value)}`);
-    } else {
-      navigate(`/products`);
-    }
   };
 
   const searchClearHandler = () => {
@@ -80,22 +98,16 @@ const ProductListPage = () => {
               </div>
               <div>
                 <p className="font-medium mb-2">Price Range</p>
-                <Slider
-                  range
-                  min={0}
-                  max={10000}
-                  value={[Number(price_gte), Number(price_lte)]}
-                  onChange={(v) => setQueryParams({ price_gte: v[0], price_lte: v[1] })}
-                />
+                <Slider range min={0} max={5000} value={priceRange} onChange={setPriceRange} />
                 <p className="text-sm text-muted-foreground">
-                  ${price_gte} - ${price_lte}
+                  ${priceRange[0]} - ${priceRange[1]}
                 </p>
               </div>
               <div>
                 <p className="font-medium mb-2">Sort By</p>
                 <Select
                   className="w-full"
-                  value={sortBy && sortOrder ? `${sortBy}_${sortOrder}` : ""}
+                  value={sortBy && sortOrder ? `${sortBy}_${sortOrder}` : undefined}
                   onChange={(value) => {
                     const [sortBy, sortOrder] = value.split("_");
                     setQueryParams({ sortBy, sortOrder });

@@ -48,11 +48,13 @@ const WishlistPage = () => {
     {
       title: "Price",
       key: "price",
+      align: "center",
       render: (_, record) => <span className="font-semibold">${record.product.price.toFixed(2)}</span>,
     },
     {
       title: "Stock",
       key: "stock",
+      align: "center",
       render: (_, record) => (
         <span className={record.product.stock > 0 ? "text-green-600" : "text-red-500"}>{record.product.stock > 0 ? "In Stock" : "Out of Stock"}</span>
       ),
@@ -60,6 +62,8 @@ const WishlistPage = () => {
     {
       title: "Actions",
       key: "actions",
+      align: "center",
+      width: 200,
       render: (_, record) => (
         <div className="flex gap-2">
           <Button
