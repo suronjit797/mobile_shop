@@ -1,31 +1,13 @@
-import { useParams, useNavigate } from "react-router-dom";
-import {
-  Button,
-  Rate,
-  Tag,
-  InputNumber,
-  Tabs,
-  Typography,
-  Breadcrumb,
-  Row,
-  Col,
-  message,
-} from "antd";
-import {
-  ShoppingCartOutlined,
-  HeartOutlined,
-  HeartFilled,
-  ArrowLeftOutlined,
-} from "@ant-design/icons";
+import { ICategory } from "@/interfaces/category.interface";
+import { useGetByIdProductQuery } from "@/redux/api/productApi";
+import { HeartFilled, HeartOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import { Breadcrumb, Button, Col, InputNumber, message, Rate, Row, Tag, Typography } from "antd";
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
-import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { addToCart } from "../../features/cart/cartSlice";
-import {
-  addToWishlist,
-  removeFromWishlist,
-} from "../../features/wishlist/wishlistSlice";
-import { mockProducts } from "../../utils/mockData";
+import { addToWishlist, removeFromWishlist } from "../../features/wishlist/wishlistSlice";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 
 const { Title, Paragraph } = Typography;
 
@@ -36,7 +18,9 @@ const ProductDetailPage = () => {
   const wishlistItems = useAppSelector((state) => state.wishlist.items);
   const [quantity, setQuantity] = useState(1);
 
-  const product = mockProducts.find((p) => p.id === id);
+  const { data, isFetching } = useGetByIdProductQuery({ id, params: { populate: "category" } });
+  const product = data?.data;
+
   if (!product)
     return (
       <MainLayout>
@@ -47,11 +31,7 @@ const ProductDetailPage = () => {
     );
 
   const isWishlisted = wishlistItems.some((i) => i.product.id === product.id);
-  const discount = product.originalPrice
-    ? Math.round(
-        ((product.originalPrice - product.price) / product.originalPrice) * 100,
-      )
-    : 0;
+  const discount = product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) dispatch(addToCart(product));
@@ -72,93 +52,52 @@ const ProductDetailPage = () => {
         <Row gutter={[32, 32]}>
           <Col xs={24} md={12}>
             <div className="rounded-xl overflow-hidden bg-muted">
-              <img
-                src={product.images[0]}
-                alt={product.name}
-                className="w-full h-[500px] object-cover"
-              />
+              <img src={product.images[0]} alt={product.name} className="w-full h-[500px] object-cover" />
             </div>
           </Col>
           <Col xs={24} md={12}>
             <div className="flex flex-col gap-4">
-              <span className="text-sm text-muted-foreground uppercase tracking-wider">
-                {product.brand}
-              </span>
+              <span className="text-sm text-muted-foreground uppercase tracking-wider">{product.brand}</span>
               <Title level={2} className="!mb-0">
                 {product.name}
               </Title>
               <div className="flex items-center gap-2">
                 <Rate disabled defaultValue={product.rating} allowHalf />
-                <span className="text-muted-foreground">
-                  ({product.reviewCount} reviews)
-                </span>
+                <span className="text-muted-foreground">({product.reviewCount} reviews)</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-3xl font-bold text-primary">
-                  ${product.price.toFixed(2)}
-                </span>
+                <span className="text-3xl font-bold text-primary">${product.price.toFixed(2)}</span>
                 {product.originalPrice && (
                   <>
-                    <span className="text-xl text-muted-foreground line-through">
-                      ${product.originalPrice.toFixed(2)}
-                    </span>
+                    <span className="text-xl text-muted-foreground line-through">${product.originalPrice.toFixed(2)}</span>
                     <Tag color="red">-{discount}%</Tag>
                   </>
                 )}
               </div>
-              <Tag color={product.stock > 0 ? "green" : "red"}>
-                {product.stock > 0
-                  ? `In Stock (${product.stock})`
-                  : "Out of Stock"}
-              </Tag>
-              <Paragraph className="text-muted-foreground">
-                {product.description}
-              </Paragraph>
+              <Tag color={product.stock > 0 ? "green" : "red"}>{product.stock > 0 ? `In Stock (${product.stock})` : "Out of Stock"}</Tag>
+              <Paragraph className="text-muted-foreground">{product.description}</Paragraph>
               <div className="flex items-center gap-4">
-                <InputNumber
-                  min={1}
-                  max={product.stock}
-                  value={quantity}
-                  onChange={(v) => setQuantity(v || 1)}
-                  size="large"
-                />
-                <Button
-                  type="primary"
-                  size="large"
-                  icon={<ShoppingCartOutlined />}
-                  onClick={handleAddToCart}
-                  disabled={product.stock === 0}
-                >
+                <InputNumber min={1} max={product.stock} value={quantity} onChange={(v) => setQuantity(v || 1)} size="large" />
+                <Button type="primary" size="large" icon={<ShoppingCartOutlined />} onClick={handleAddToCart} disabled={product.stock === 0}>
                   Add to Cart
                 </Button>
                 <Button
                   size="large"
-                  icon={
-                    isWishlisted ? (
-                      <HeartFilled className="text-red-500" />
-                    ) : (
-                      <HeartOutlined />
-                    )
-                  }
-                  onClick={() =>
-                    isWishlisted
-                      ? dispatch(removeFromWishlist(product.id))
-                      : dispatch(addToWishlist(product))
-                  }
+                  icon={isWishlisted ? <HeartFilled className="text-red-500" /> : <HeartOutlined />}
+                  onClick={() => (isWishlisted ? dispatch(removeFromWishlist(product.id)) : dispatch(addToWishlist(product)))}
                 >
                   {isWishlisted ? "Wishlisted" : "Wishlist"}
                 </Button>
               </div>
               <div className="border-t border-border pt-4 mt-4">
                 <p className="text-sm text-muted-foreground">
-                  Category:{" "}
-                  <span className="text-foreground">{product.category}</span>
+                  Category: <span className="text-foreground">{(product.category as ICategory)?.name}</span>
                 </p>
               </div>
             </div>
           </Col>
         </Row>
-        <Tabs
+        {/* <Tabs
           className="mt-12"
           items={[
             {
@@ -169,14 +108,13 @@ const ProductDetailPage = () => {
             {
               key: "reviews",
               label: "Reviews",
-              children: (
-                <Paragraph className="text-muted-foreground">
-                  Reviews will be loaded from the API.
-                </Paragraph>
-              ),
+              children: <Paragraph className="text-muted-foreground">Reviews will be loaded from the API.</Paragraph>,
             },
           ]}
-        />
+        /> */}
+
+        <h2 className="text-md mt-5"> Description </h2>
+        <p className="text-muted-foreground">{product.description}</p>
       </div>
     </MainLayout>
   );

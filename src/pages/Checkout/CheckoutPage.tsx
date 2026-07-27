@@ -73,11 +73,9 @@ const CheckoutPage = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data = await create(body as any).unwrap();
 
-      console.log({ data });
-
-      // dispatch(clearCart());
-      // setOrderPlaced(true);
-      // message.success("Order placed successfully!");
+      message.success(`Order placed successfully!`);
+      dispatch(clearCart());
+      navigate("/");
     } catch (error) {
       console.error("Validation failed:", error);
     }
