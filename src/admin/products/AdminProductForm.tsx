@@ -33,12 +33,13 @@ const AdminProductForm: React.FC<Props> = ({ formDrawer, setFromDrawer }) => {
   }, [data, form]);
 
   const handleFinish = async (values: Partial<IProduct>) => {
+    const body = { ...values, seller: user?._id };
     try {
       if (formDrawer?.mode === "update" && data?._id) {
-        await update({ id: data._id, body: values }).unwrap();
+        await update({ id: data._id, body }).unwrap();
         message.success("Product updated successfully");
       } else {
-        await create(values).unwrap();
+        await create(body).unwrap();
         message.success("Product created successfully");
       }
       setFromDrawer({ open: false, mode: undefined, data: undefined });

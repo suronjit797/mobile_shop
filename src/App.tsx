@@ -1,14 +1,13 @@
+import { App as AntApp, ConfigProvider, Spin } from "antd";
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { ConfigProvider, Spin, App as AntApp } from "antd";
-import RoleRoute from "./routes/roleRoutes";
-import PrivateRoute from "./routes/privateRoutes";
-import PublicRoute from "./routes/publicRoutes";
+import AdminCategory from "./admin/category/AdminCategory";
 import AdminLayout from "./components/layout/AdminLayout";
 import SellerLayout from "./components/layout/SellerLayout";
 import { UserRole } from "./interfaces/userInterface";
-import CategoryListPage from "./pages/Category/CategoryListPage";
-import AdminCategory from "./admin/category/AdminCategory";
+import PrivateRoute from "./routes/privateRoutes";
+import PublicRoute from "./routes/publicRoutes";
+import RoleRoute from "./routes/roleRoutes";
 
 // Lazy loaded pages
 const HomePage = lazy(() => import("./pages/Home/HomePage"));
@@ -31,7 +30,6 @@ const AdminUsers = lazy(() => import("./admin/users/AdminUsers"));
 
 // Seller pages
 const SellerDashboard = lazy(() => import("./seller/dashboard/SellerDashboard"));
-const SellerProducts = lazy(() => import("./seller/products/SellerProducts"));
 const SellerOrders = lazy(() => import("./seller/orders/SellerOrders"));
 
 const Loading = () => (
@@ -94,7 +92,7 @@ const App = () => (
             <Route element={<RoleRoute allowedRoles={[UserRole.SELLER]} />}>
               <Route element={<SellerLayout />}>
                 <Route path="/seller" element={<SellerDashboard />} />
-                <Route path="/seller/products" element={<SellerProducts />} />
+                <Route path="/seller/products" element={<AdminProducts />} />
                 <Route path="/seller/orders" element={<SellerOrders />} />
                 <Route path="/seller/inventory" element={<div>Inventory Management</div>} />
               </Route>
