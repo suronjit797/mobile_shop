@@ -74,8 +74,10 @@ const ProductDetailPage = () => {
                   </>
                 )}
               </div>
-              <Tag color={product.stock > 0 ? "green" : "red"}>{product.stock > 0 ? `In Stock (${product.stock})` : "Out of Stock"}</Tag>
-              <Paragraph className="text-muted-foreground">{product.description}</Paragraph>
+              <div>
+                <Tag color={product.stock > 0 ? "green" : "red"}>{product.stock > 0 ? `In Stock (${product.stock})` : "Out of Stock"}</Tag>
+              </div>
+              {/* <Paragraph className="text-muted-foreground">{product.description}</Paragraph> */}
               <div className="flex items-center gap-4">
                 <InputNumber min={1} max={product.stock} value={quantity} onChange={(v) => setQuantity(v || 1)} size="large" />
                 <Button type="primary" size="large" icon={<ShoppingCartOutlined />} onClick={handleAddToCart} disabled={product.stock === 0}>

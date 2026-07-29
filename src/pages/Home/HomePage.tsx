@@ -137,9 +137,9 @@ const HomePage = () => {
           <Row gutter={[16, 16]}>
             {Array.isArray(featuredProducts?.data)
               ? featuredProducts?.data?.map((p) => (
-                  <div key={p._id} className="rounded-xl overflow-hidden shadow-lg">
-                    <img src={p.images[0]} alt={p.name} className="w-full h-48 object-cover" />
-                  </div>
+                  <Col xs={12} sm={8} md={6} key={p._id}>
+                    <ProductCard product={p} />
+                  </Col>
                 ))
               : []}
           </Row>
@@ -158,7 +158,7 @@ const HomePage = () => {
             </div>
             <Row gutter={[16, 16]}>
               {dealProducts?.data?.map((product) => (
-                <Col xs={12} sm={8} md={6} key={product.id}>
+                <Col xs={12} sm={8} md={6} key={product._id}>
                   <ProductCard product={product} />
                 </Col>
               ))}
