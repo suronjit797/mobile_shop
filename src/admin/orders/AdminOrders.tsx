@@ -40,6 +40,15 @@ const getAvailableStatusOptions = (currentStatus: IOrder["status"]) => {
   }
 };
 
+const calculateOrderTotal = (order: IOrder): number => {
+  if (!Array.isArray(order.items)) return 0;
+  return order.items.reduce((sum, item) => {
+    const product = typeof item.product === "object" ? item.product : null;
+    const price = product?.price || 0;
+    return sum + price * (item.quantity || 1);
+  }, 0);
+};
+
 const AdminOrders = () => {
   const { queryParams, setQueryParams, getNonEmptyQueryParams } = useQueryParams({ page: 1, limit: 10 });
   const { user } = useAppSelector((state) => state.auth) || {};
@@ -62,8 +71,9 @@ const AdminOrders = () => {
         if (res?.success) {
           notification.success({ message: "Order Status Updated Successfully.", duration: 2, showProgress: true });
         }
-      } catch (error) {
-        notification.error({ message: error?.data?.message || "Order Status Update Failed.", duration: 2, showProgress: true });
+      } catch (error: unknown) {
+        const errorMessage = (error as { data?: { message?: string } })?.data?.message || "Order Status Update Failed.";
+        notification.error({ message: errorMessage, duration: 2, showProgress: true });
       } finally {
         setUpdatingId(null);
       }
@@ -82,31 +92,44 @@ const AdminOrders = () => {
   };
 
   const columns: TableProps<IOrder>["columns"] = [
-    { title: "Order ID", dataIndex: "orderId", key: "orderId", render: (v) => `ODR-${String(v)?.padStart(6, "0")}`, width: 140 },
+    { title: "Order ID", dataIndex: "orderId", key: "orderId", render: (v) => `ODR-${String(v)?.padStart(6, "0")}`, width: 140, align: 'center' },
     {
       title: "Items",
       dataIndex: "items",
       key: "items",
       render: (v) => (
-        <div>
-          {v?.map((item, idx: number) => (
-            <div key={idx} className="flex items-center gap-3">
-              <div className="w-12 h-12 object-cover rounded">
-                <Image src={item?.product?.images?.[0]} alt={item?.product?.name} />
+        <div className="flex flex-col gap-2">
+          {v?.map((item, idx: number) => {
+            const product = typeof item.product === "object" ? item.product : null;
+            return (
+              <div key={idx} className="flex items-center gap-3">
+                {product?.images?.[0] && (
+                  <div className="w-10 h-10 object-cover rounded border overflow-hidden">
+                    <Image src={product.images[0]} alt={product?.name || "Product"} width={40} height={40} />
+                  </div>
+                )}
+                <div>
+                  <p className="font-medium text-sm">{product?.name || "Product"}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Qty: {item.quantity} {product?.price ? `× $${product.price.toFixed(2)}` : ""}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="font-medium">{item?.product?.name}</p>
-                <p className="text-sm text-muted-foreground">Qty: {item?.quantity}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ),
     },
-    { title: "Customer", dataIndex: "customer", key: "customer", render: (v) => v?.name },
-    { title: "Customer Email", dataIndex: "customer", key: "customer", render: (v) => v?.email },
-    { title: "Status", dataIndex: "status", key: "status", render: (s: string) => <Tag color={statusColors[s]}>{s.toUpperCase()}</Tag> },
-    { title: "Date", dataIndex: "createdAt", key: "createdAt", render: (v) => dayjs(v).format("DD/MM/YYYY : hh:mm A") },
+    {
+      title: "Total Price",
+      key: "totalPrice",
+      align: "center",
+      render: (_, record) => <span className="font-semibold text-emerald-600">${calculateOrderTotal(record).toFixed(2)}</span>,
+    },
+    { title: "Customer", dataIndex: "customer", key: "customer", render: (v) => (typeof v === "object" && v ? v.name : "Guest") },
+    { title: "Customer Email", dataIndex: "customer", key: "customer", render: (v) => (typeof v === "object" && v ? v.email : "N/A") },
+    { title: "Status", dataIndex: "status", key: "status", render: (s: string) => <Tag color={statusColors[s]}>{s.toUpperCase()}</Tag>, align: 'center' },
+    { title: "Date", dataIndex: "createdAt", key: "createdAt", render: (v) => dayjs(v).format("DD/MM/YYYY : hh:mm A"), align: 'center' },
     {
       title: "Actions",
       key: "actions",
@@ -148,3 +171,4 @@ const AdminOrders = () => {
 };
 
 export default AdminOrders;
+
