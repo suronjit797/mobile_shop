@@ -1,14 +1,19 @@
 import CustomTable from "@/components/CustomTable";
 import { useQueryParams } from "@/hooks/useQueryParams";
 import { IOrder } from "@/interfaces/order.interface";
-import { IUser } from "@/interfaces/userInterface";
 import { useGetAllOrderQuery } from "@/redux/api/orderApi";
-import { Table, Tag, Typography, Card, TableProps, Image } from "antd";
+import { useAppSelector } from "@/redux/store";
+import { Card, Image, TableProps, Tag, Typography } from "antd";
+import dayjs from "dayjs";
 
 const { Title } = Typography;
 
 const AdminOrders = () => {
   const { queryParams, setQueryParams, getNonEmptyQueryParams } = useQueryParams({ page: 1, limit: 10 });
+  const { user } = useAppSelector((state) => state.auth) || {};
+
+  const filter = {};
+  // if (user.role !=UserRole.SUPER_ADMIN) filter.
 
   // rtk query
   const { data, isFetching } = useGetAllOrderQuery({ ...getNonEmptyQueryParams, populate: "customer items.product" });
@@ -39,9 +44,9 @@ const AdminOrders = () => {
     { title: "Customer", dataIndex: "customer", key: "customer", render: (v) => v?.name },
     { title: "Customer Email", dataIndex: "customer", key: "customer", render: (v) => v?.email },
 
-    // { title: "Total", dataIndex: "total", key: "total", render: (v: number) => `$${v.toFixed(2)}` },
-    // { title: "Status", dataIndex: "status", key: "status", render: (s: string) => <Tag color={statusColors[s]}>{s.toUpperCase()}</Tag> },
-    // { title: "Date", dataIndex: "date", key: "date" },
+    // { title: "Total", dataIndex: "total", key: "total", render: (v: number) => `$${v?.toFixed(2)}` },
+    { title: "Status", dataIndex: "status", key: "status", render: (s: string) => <Tag color={statusColors[s]}>{s.toUpperCase()}</Tag> },
+    { title: "Date", dataIndex: "createdAt", key: "createdAt", render: (v) => dayjs(v).format("DD/MM/YYYY : hh:mm A") },
   ];
 
   return (

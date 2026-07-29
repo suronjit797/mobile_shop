@@ -30,7 +30,6 @@ const AdminUsers = lazy(() => import("./admin/users/AdminUsers"));
 
 // Seller pages
 const SellerDashboard = lazy(() => import("./seller/dashboard/SellerDashboard"));
-const SellerOrders = lazy(() => import("./seller/orders/SellerOrders"));
 
 const Loading = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -93,7 +92,7 @@ const App = () => (
               <Route element={<SellerLayout />}>
                 <Route path="/seller" element={<SellerDashboard />} />
                 <Route path="/seller/products" element={<AdminProducts />} />
-                <Route path="/seller/orders" element={<SellerOrders />} />
+                <Route path="/seller/orders" element={<AdminOrders />} />
                 <Route path="/seller/inventory" element={<div>Inventory Management</div>} />
               </Route>
             </Route>
