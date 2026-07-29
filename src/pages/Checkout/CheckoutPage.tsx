@@ -5,8 +5,7 @@ import MainLayout from "../../components/layout/MainLayout";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
 import { clearCart } from "../../features/cart/cartSlice";
 import { PAYMENT_METHODS } from "../../constants";
-import { _ } from "vitest/dist/chunks/reporters.d.BuRON0I0.js";
-import { ICustomerOrderInfo, IOrder } from "@/interfaces/order.interface";
+import { ICustomerOrderInfo } from "@/interfaces/order.interface";
 import { useCreateOrderMutation } from "@/redux/api/orderApi";
 
 const { Title } = Typography;
@@ -20,9 +19,8 @@ const CheckoutPage = () => {
 
   const [currentStep, setCurrentStep] = useState(0);
   const [orderPlaced, setOrderPlaced] = useState(false);
-  const [formData, setFormData] = useState<ICustomerOrderInfo>();
 
-  // rkt query
+  // rtk query
   const [create, { isLoading: createLoading }] = useCreateOrderMutation();
 
   const total = items.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
@@ -56,28 +54,51 @@ const CheckoutPage = () => {
   }
 
   const handlePlaceOrder = async () => {
-    try {
-      await form.validateFields();
+    // Only execute order creation when on the final Review step
+    console.log({ currentStep, steps: steps.length });
+    if (currentStep !== steps.length - 1) return;
 
-      console.log({ formData, items });
-      if (!Array.isArray(items) || items.length === 0) return message.error("Your cart is empty");
-      const bodyItems = items.map((i) => ({ product: typeof i.product === "string" ? i.product : i.product._id, quantity: i.quantity }));
+    try {
+      const allValues = form.getFieldsValue(true);
+      const customerOrderInfo: ICustomerOrderInfo = {
+        name: allValues.name || "",
+        street: allValues.street || "",
+        city: allValues.city || "",
+        state: allValues.state || "",
+        zipCode: allValues.zipCode || "",
+        country: allValues.country || "",
+        phone: allValues.phone || "",
+        paymentMethod: allValues.paymentMethod || "",
+      };
+
+      if (!Array.isArray(items) || items.length === 0) {
+        message.error("Your cart is empty");
+        return;
+      }
+
+      const bodyItems = items.map((i) => ({
+        product: typeof i.product === "string" ? i.product : i.product._id,
+        quantity: i.quantity,
+      }));
 
       const body = {
         items: bodyItems,
-        customer: user?._id,
-        customerOrderInfo: formData,
-        status: "pending",
+        customer: user?._id || "",
+        customerOrderInfo,
+        status: "pending" as const,
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = await create(body as any).unwrap();
+      const res = await create(body).unwrap();
 
-      message.success(`Order placed successfully!`);
-      dispatch(clearCart());
-      navigate("/");
-    } catch (error) {
-      console.error("Validation failed:", error);
+      if (res?.success) {
+        message.success("Order placed successfully!");
+        dispatch(clearCart());
+        setOrderPlaced(true);
+      }
+    } catch (error: unknown) {
+      console.error("Order placement error:", error);
+      const errorMessage = (error as { data?: { message?: string } })?.data?.message || "Failed to place order.";
+      message.error(errorMessage);
     }
   };
 
@@ -85,13 +106,12 @@ const CheckoutPage = () => {
     try {
       if (currentStep === 0) {
         await form.validateFields(["name", "street", "city", "state", "zipCode", "country", "phone"]);
-      }
-      if (currentStep === 1) {
+      } else if (currentStep === 1) {
         await form.validateFields(["paymentMethod"]);
       }
       setCurrentStep((s) => s + 1);
-    } catch (error) {
-      console.log("Please complete the required fields");
+    } catch {
+      message.error("Please complete the required fields");
     }
   };
 
@@ -132,7 +152,7 @@ const CheckoutPage = () => {
       title: "Payment",
       content: (
         <div className="max-w-lg">
-          <Form.Item name="paymentMethod" label="Select Payment Method" rules={[{ required: true }]}>
+          <Form.Item name="paymentMethod" label="Select Payment Method" rules={[{ required: true, message: "Please select a payment method" }]}>
             <Radio.Group className="flex flex-col gap-3 w-full">
               {PAYMENT_METHODS.map((m) => (
                 <Radio.Button key={m.value} value={m.value} className="h-12 flex items-center px-4">
@@ -149,7 +169,7 @@ const CheckoutPage = () => {
       content: (
         <div>
           {items.map((item) => (
-            <div key={item.product.id} className="flex items-center justify-between py-3 border-b border-border">
+            <div key={item.product.id || item.product._id} className="flex items-center justify-between py-3 border-b border-border">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 object-cover rounded">
                   <Image src={item.product.images[0]} alt={item.product.name} />
@@ -187,31 +207,25 @@ const CheckoutPage = () => {
         <Title level={2}>Checkout</Title>
         <Steps current={currentStep} items={steps.map((s) => ({ title: s.title }))} className="mb-8" />
 
-        <Form
-          form={form}
-          layout="vertical"
-          name="checkoutForm"
-          preserve={true}
-          onFinish={handlePlaceOrder}
-          onValuesChange={(_, values) => setFormData((pre) => ({ ...pre, ...values }))}
-        >
+        <Form form={form} layout="vertical" name="checkoutForm" preserve={true}>
           <Card className="mb-6">{steps[currentStep].content}</Card>
 
           <div className="flex justify-between">
-            <Button disabled={currentStep === 0} onClick={() => setCurrentStep((s) => s - 1)}>
+            <Button disabled={currentStep === 0} htmlType="button" onClick={() => setCurrentStep((s) => s - 1)}>
               Previous
             </Button>
             {currentStep < steps.length - 1 ? (
-              <Button type="primary" onClick={handleNextStep}>
+              <Button type="primary" htmlType="button" onClick={handleNextStep}>
                 Next
               </Button>
             ) : (
-              <Button type="primary" htmlType="submit">
+              <Button type="primary" htmlType="button" loading={createLoading} onClick={handlePlaceOrder}>
                 Place Order
               </Button>
             )}
           </div>
         </Form>
+
       </div>
     </MainLayout>
   );

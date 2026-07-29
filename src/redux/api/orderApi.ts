@@ -7,7 +7,7 @@ const name = "Order";
 
 export const orderApi = mainApi.injectEndpoints({
   endpoints: (builder) => ({
-    ...globalEndpoints<IOrder, typeof name>(builder, path, name, []),
+    ...globalEndpoints<IOrder, typeof name>(builder, path, name, ["Product"]),
   }),
 });
 
