@@ -33,7 +33,8 @@ const AdminProductForm: React.FC<Props> = ({ formDrawer, setFromDrawer }) => {
   }, [data, form]);
 
   const handleFinish = async (values: Partial<IProduct>) => {
-    const body = { ...values, seller: user?._id };
+    const body = { ...values };
+    if (!body.seller) body.seller = user?._id;
     try {
       if (formDrawer?.mode === "update" && data?._id) {
         await update({ id: data._id, body }).unwrap();
@@ -145,7 +146,7 @@ const AdminProductForm: React.FC<Props> = ({ formDrawer, setFromDrawer }) => {
           <Select
             placeholder="Select seller"
             className="w-full h-9"
-            disabled={isUpdateMode}
+            // disabled={isUpdateMode}
             loading={sellersFetching}
             options={Array.isArray(sellers?.data) ? sellers?.data?.map((sel) => ({ value: sel._id, label: sel.name })) : []}
           />

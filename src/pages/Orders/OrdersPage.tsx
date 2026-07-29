@@ -2,6 +2,7 @@ import CustomTable from "@/components/CustomTable";
 import MainLayout from "@/components/layout/MainLayout";
 import { useQueryParams } from "@/hooks/useQueryParams";
 import { IOrder } from "@/interfaces/order.interface";
+import { IProduct } from "@/interfaces/product.interface";
 import { globalModalProps } from "@/lib/utils";
 import { useGetAllOrderQuery, useUpdateOrderMutation } from "@/redux/api/orderApi";
 import { useAppSelector } from "@/redux/store";
@@ -45,7 +46,7 @@ const OrdersPage = () => {
           if (res?.success) {
             notification.success({ message: "Order cancelled successfully.", duration: 2, showProgress: true });
           }
-        } catch (error: any) {
+        } catch (error) {
           notification.error({ message: error?.data?.message || "Failed to cancel order.", duration: 2, showProgress: true });
         } finally {
           setCancellingId(null);
@@ -69,7 +70,7 @@ const OrdersPage = () => {
       key: "items",
       render: (v) => (
         <div className="flex flex-col gap-2">
-          {v?.map((item: any, idx: number) => {
+          {v?.map((item, idx: number) => {
             const product = item?.product;
             return (
               <div key={idx} className="flex items-center gap-3">
@@ -95,8 +96,8 @@ const OrdersPage = () => {
       key: "total",
       render: (_, record) => {
         const totalAmount = Array.isArray(record.items)
-          ? record.items.reduce((sum: number, item: any) => {
-              const price = item?.product?.price || 0;
+          ? record.items.reduce((sum: number, item) => {
+              const price = (item?.product as IProduct)?.price || 0;
               return sum + price * (item?.quantity || 1);
             }, 0)
           : 0;
@@ -124,12 +125,7 @@ const OrdersPage = () => {
         if (!canCancel) return <Text type="secondary">-</Text>;
 
         return (
-          <Button
-            size="small"
-            danger
-            loading={cancellingId === record._id}
-            onClick={() => handleCancelOrder(record._id)}
-          >
+          <Button size="small" danger loading={cancellingId === record._id} onClick={() => handleCancelOrder(record._id)}>
             Cancel
           </Button>
         );
@@ -180,4 +176,3 @@ const OrdersPage = () => {
 };
 
 export default OrdersPage;
-
